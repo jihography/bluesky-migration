@@ -1,3 +1,13 @@
+%pip install openai==0.28
+import time
+import openai
+import pandas as pd
+import ast
+import time
+import json
+from datetime import datetime
+import re
+
 def classify_countries_batch(batch_texts, batch_indices):
     while True:
         try:
