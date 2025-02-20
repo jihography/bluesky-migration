@@ -88,7 +88,7 @@ def classify_countries_batch(batch_texts, batch_indices):
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
                 ],
-                temprature = 0
+                temperature = 0
             )
 
             # Parse the API response
