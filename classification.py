@@ -1,13 +1,3 @@
-%pip install openai==0.28
-import time
-import openai
-import pandas as pd
-import ast
-import time
-import json
-from datetime import datetime
-import re
-
 def classify_countries_batch(batch_texts, batch_indices):
     while True:
         try:
@@ -97,7 +87,8 @@ def classify_countries_batch(batch_texts, batch_indices):
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                temprature = 0
             )
 
             # Parse the API response
@@ -118,58 +109,3 @@ def classify_countries_batch(batch_texts, batch_indices):
         except Exception as e:
             print(f"An error occurred: {e}. Retrying...")
             time.sleep(5)  # Retry after a short delay
-
-openai.api_key = 'api-key'
-
-# Load the dataset
-df = pd.read_csv("./Data/checkpoint_250117.csv")
-# df = df.head(100)
-
-# Add an empty 'country' column for results
-if 'country' not in df.columns:
-    df['country'] = None
-
-output_file = "checkpoint_250117_classified.csv"
-
-# Process the DataFrame in batches
-batch_size = 500
-
-# Batches for logging errors
-error_batches = []
-
-for start_idx in range(0, len(df), batch_size):
-    end_idx = min(start_idx + batch_size, len(df))
-    batch_texts = df.loc[start_idx:end_idx - 1, 'text'].tolist()
-    batch_indices = df.loc[start_idx:end_idx - 1].index.tolist()
-    print(f"Processing batch {start_idx} to {end_idx - 1}...")
-
-    try:
-        # Apply function
-        batch_results = classify_countries_batch(batch_texts, batch_indices)
-
-        # Update dataframe
-        for idx, country in batch_results.items():
-            df.at[idx, 'country'] = country
-
-        # Save to CSV file
-        df.to_csv(output_file, index=False, encoding='utf-8-sig')
-        print(f"Completed processing batch {start_idx} to {end_idx - 1}!! Saved progress to {output_file}.")
-
-    except Exception as e:
-        # Log error ocurred batch
-        print(f"An error occurred while processing batch {start_idx} to {end_idx - 1}: {e}")
-        print("Skipping this batch and continuing with the next one.")
-        error_batches.append((start_idx, end_idx - 1))
-        continue 
-
-    time.sleep(2) 
-
-# Print error log
-if error_batches:
-    print("\nThe following batches encountered errors and were skipped:")
-    for batch in error_batches:
-        print(f"Batch {batch[0]} to {batch[1]}")
-else:
-    print("\nAll batches appended successfully.")
-
-print("Processing complete. Results saved.")
